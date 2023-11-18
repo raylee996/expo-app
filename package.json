@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
+    "postinstall": "rndebugger-open",
+    "start": "set REACT_DEBUGGER=\"rndebugger-open --open --port 8081\" && expo start",
+    "android": "set REACT_DEBUGGER=\"rndebugger-open --open --port 8081\" && expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "react-native-debugger-open": "^0.4.3",
     "typescript": "^5.2.2"
   },
   "overrides": {

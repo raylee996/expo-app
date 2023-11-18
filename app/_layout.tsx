@@ -2,8 +2,8 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
-import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Dimensions, Platform, UIManager, useColorScheme } from 'react-native';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -18,11 +18,40 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+if (Platform.OS === 'android') {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
+
+console.log('app')
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
+
+  const [appReady, setAppReady] = useState(false)
+
+  useEffect(() => {
+    const sub = Dimensions.addEventListener('change', ({ window, screen }) => {
+      Alert.alert(`${window.width}, ${window.height}`)
+      Alert.alert(`${screen.width}, ${screen.height}`)
+    })
+    async function readyApp() {
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(1)
+          setAppReady(true)
+        }, 3000)
+      })
+    }
+    readyApp()
+    return () => {
+      sub.remove()
+    }
+  }, [])
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -30,12 +59,12 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
+    if (appReady) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [appReady]);
 
-  if (!loaded) {
+  if (!appReady) {
     return null;
   }
 
